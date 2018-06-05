@@ -6,20 +6,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Dynamic;
 using Microsoft.Xna.Framework.Utilities;
+using System.IO;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
-{
+{    
     internal class ReflectiveSerializer : ContentTypeSerializer
     {
         const BindingFlags _bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
+        
         private struct ElementInfo
         {
             public ContentSerializerAttribute Attribute;
             public ContentTypeSerializer Serializer;
             public Action<object, object> Setter;
             public Func<object, object> Getter;
+
+            public override string ToString()
+            {
+                return Attribute.ToString();
+            }
         };
 
         private readonly List<ElementInfo> _elements = new List<ElementInfo>();
@@ -172,12 +180,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                         // safely skip it and continue.
                         if (info.Attribute.Optional)
                             continue;
-                        
+
+
+                        // 
+                        //if (!info.Attribute.HasText && !info.Attribute.isAttribute)
+
                         // We failed to find a required element.
                         throw new InvalidContentException(string.Format("The Xml element `{0}` is required!", info.Attribute.ElementName));
                     }
                 }
-
+               
                 if (info.Attribute.SharedResource)
                 {
                     Action<object> fixup = (o) => info.Setter(result, o);
@@ -187,7 +199,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 {
                     var value = info.Getter(result);
                     input.ReadObject(info.Attribute, info.Serializer, value);
-                }
+                }                
                 else
                 {
                     var value = input.ReadObject<object>(info.Attribute, info.Serializer);

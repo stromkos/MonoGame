@@ -456,7 +456,7 @@ namespace MonoGame.Tests.ContentPipeline
                 expectedCharacters.Add(HttpUtility.HtmlDecode("&#916;")[0]);
                 expectedCharacters.Add(HttpUtility.HtmlDecode("&#176;")[0]);
 
-                var characters = new List<char>(fontDesc.Characters);
+                var characters = new List<char>(fontDesc.Characters.Keys);
                 foreach (var c in expectedCharacters)
                 {
                     Assert.Contains(c, characters);

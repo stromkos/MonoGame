@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 #endregion
+using System.Linq;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -75,8 +76,8 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                     // Scan each character of the string.
                     foreach (char usedCharacter in resourceString)
                     {
-                        if (!input.Characters.Contains (usedCharacter))
-                            input.Characters.Add(usedCharacter);
+                        if (!input.Characters.Keys.ToList().Contains(usedCharacter))
+                            input.Characters.Add(usedCharacter, usedCharacter);
                     }
                 }
 

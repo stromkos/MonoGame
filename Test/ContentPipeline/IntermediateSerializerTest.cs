@@ -415,9 +415,9 @@ namespace MonoGame.Tests.ContentPipeline
             };
 
             for (var i = 32; i <= 126; i++)
-                fontDescription.Characters.Add((char) i);
-            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#916;")[0]);
-            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#176;")[0]);
+                fontDescription.Characters.Add((char)i, (uint)i);
+            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#916;")[0],916);
+            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#176;")[0],176);
 
             SerializeAndAssert("19_FontDescription.xml", fontDescription);
         }

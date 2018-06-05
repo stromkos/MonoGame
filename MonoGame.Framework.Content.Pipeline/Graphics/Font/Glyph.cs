@@ -20,18 +20,35 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 	internal class Glyph
 	{
 		// Constructor.
-        public Glyph(char character, BitmapContent bitmap, Rectangle? subrect = null)
+        public Glyph(char character,BitmapContent bitmap, Rectangle? subrect = null, uint display=0)
 		{
 			this.Character = character;
 			this.Bitmap = bitmap;
 			this.Subrect = subrect.GetValueOrDefault(new Rectangle(0, 0, bitmap.Width, bitmap.Height));
 			this.Width = bitmap.Width;
 			this.Height = bitmap.Height;
+            if(display==0)
+            this.Display = (uint) character;
 		}
             
 		// Unicode codepoint.
 		public char Character;
 
+
+        private uint pDisplay = 0;
+
+        // Actual image to be displayed
+        [ContentSerializerIgnore]
+        public uint Display
+        {
+            get
+            {
+                if (pDisplay == 0)
+                    return Character;
+                return pDisplay;            
+            }
+            set { pDisplay = value; }
+        }
 		// Glyph image data (may only use a portion of a larger bitmap).
         public BitmapContent Bitmap;
 		public Rectangle Subrect;

@@ -57,6 +57,9 @@ namespace Microsoft.Xna.Framework.Content
 
         public bool Optional { get; set; }
 
+        public bool HasText { get; set; }
+        public bool isAttribute { get; set; }
+
         public bool SharedResource { get; set; }
 
         public ContentSerializerAttribute Clone()
@@ -68,7 +71,21 @@ namespace Microsoft.Xna.Framework.Content
             clone.FlattenContent = FlattenContent;
             clone.Optional = Optional;
             clone.SharedResource = SharedResource;
+            clone.HasText = HasText;
+            clone.isAttribute = isAttribute;
             return clone;
+        }
+        public override string ToString()
+        {
+            string o = " AllowNull: " + AllowNull.ToString() +"\n\r";
+            if(!HasCollectionItemName) o += "_collectionItemName: " + _collectionItemName + "\n\r";
+            o += " ElementName: " + ElementName + "\n\r";
+            o += " FlattenContent: " + FlattenContent.ToString() + "\n\r";
+            o += " Optional: " + Optional.ToString() + "\n\r";
+            o += " SharedResource: " + SharedResource.ToString() +"\n\r";
+            o += " HasText: " + HasText.ToString() + "\n\r";
+            o += " isAttribute: " + isAttribute.ToString();
+            return o;
         }
     }
 } 

@@ -36,7 +36,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 					var glyphList = new List<Glyph>();
 					// Rasterize each character in turn.
-					foreach (char character in characters)
+					foreach (var character in characters)
 					{
 						var glyph = ImportGlyph(character, face);
 						glyphList.Add(glyph);
@@ -87,9 +87,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
 
 		// Rasterizes a single character glyph.
-		private Glyph ImportGlyph(char character, Face face)
+		private Glyph ImportGlyph(KeyValuePair<char,uint> character, Face face)
 		{
-			uint glyphIndex = face.GetCharIndex(character);
+            //-//throw new Exception("import glyph" + character.ToString());
+			uint glyphIndex = face.GetCharIndex(character.Value);
 			face.LoadGlyph(glyphIndex, LoadFlags.Default, LoadTarget.Normal);
 			face.Glyph.RenderGlyph(RenderMode.Normal);
 
@@ -147,7 +148,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			abc.C = (face.Glyph.Metrics.HorizontalAdvance >> 6) - (abc.A + abc.B);
 
 			// Construct the output Glyph object.
-			return new Glyph(character, glyphBitmap)
+			return new Glyph(character.Key, glyphBitmap,null,character.Value)
 			{
 				XOffset = -(face.Glyph.Advance.X >> 6),
 				XAdvance = face.Glyph.Metrics.HorizontalAdvance >> 6,

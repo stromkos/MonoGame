@@ -8,79 +8,16 @@ using System.Linq;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
-    internal class CharacterCollection : ICollection<char>
+    /// <summary>
+	/// Dictionary of Characters and Display character mappings.
+    /// <devdoc>
+    /// Could be removed, with all refs changed to Dictionary
+    /// Left in to minimize changes to code base
+    /// </devdoc>
+	/// </summary>
+    internal class CharacterCollection :Dictionary<char,uint>
     {
-        private List<char> _items;
-
-        public CharacterCollection()
-        {
-            _items = new List<char>();
-        }
-
-        public CharacterCollection(IEnumerable<char> characters)
-        {
-            _items = new List<char>();
-            foreach (var c in characters)
-                Add(c);
-        }
-
-        #region ICollection<char> Members
-
-        public void Add(char item)
-        {
-            if (!_items.Contains(item))
-                _items.Add(item);
-        }
-
-        public void Clear()
-        {
-            _items.Clear();
-        }
-
-        public bool Contains(char item)
-        {
-            return _items.Contains(item);
-        }
-
-        public void CopyTo(char[] array, int arrayIndex)
-        {
-            _items.CopyTo(array, arrayIndex);
-        }
-
-        public int Count
-        {
-            get { return _items.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
-
-        public bool Remove(char item)
-        {
-            return _items.Remove(item);
-        }
-
-        #endregion
-
-        #region IEnumerable<char> Members
-
-        public IEnumerator<char> GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        #endregion
-
-        #region IEnumerable Members
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        #endregion
+        // Uses the base class for ICollection members
     }
 
 	/// <summary>
@@ -193,14 +130,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 defaultCharacter = value;
             }
         }
-
+        /// <summary>
+        /// Gets or sets characters included in the font.
+        /// </summary>
         [ContentSerializer(CollectionItemName = "CharacterRegion")]
         internal CharacterRegion[] CharacterRegions
         {
             get
             {
                 var regions = new List<CharacterRegion>();
-                var chars = Characters.ToList();
+                var chars = Characters.Keys.ToList();
                 chars.Sort();
 
                 var start = chars[0];
@@ -210,13 +149,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 {
                     if (chars[i] != (end+1))
                     {
-                        regions.Add(new CharacterRegion(start, end));
+                        regions.Add(new CharacterRegion(start, end, Characters[start]));
                         start = chars[i];
                     }
                     end = chars[i];
                 }
 
-                regions.Add(new CharacterRegion(start, end));
+                regions.Add(new CharacterRegion(start, end, Characters[start]));
 
                 return regions.ToArray();
             }
@@ -229,17 +168,27 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                     if (characterRegion.End < characterRegion.Start)
                         throw new ArgumentException("CharacterRegion.End must be greater than CharacterRegion.Start");
 
-                    for (var start = characterRegion.Start; start <= characterRegion.End; start++)
-                        Characters.Add(start);
+                    foreach (var character in characterRegion.Characters())
+                    {
+                        if(!Characters.ContainsKey(character.Key))
+                        Characters.Add(character.Key, character.Value);
+                    }
                 }
             }
         }
 		
 	    [ContentSerializerIgnore]
-	    public ICollection<char> Characters
+	    public Dictionary<char,uint> Characters
 	    {
 	        get { return characters; } 
-            internal set { characters = new CharacterCollection(value); }
+            internal set
+            {
+                characters = new CharacterCollection();
+                foreach (var item in value)
+                {
+                    characters.Add(item.Key, item.Value);
+                }
+            }
 	    }
 
         internal FontDescription()
