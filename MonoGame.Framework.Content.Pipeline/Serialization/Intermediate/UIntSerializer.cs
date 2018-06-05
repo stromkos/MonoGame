@@ -17,7 +17,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         protected internal override uint Deserialize(string[] inputs, ref int index)
         {
-            return XmlConvert.ToUInt32(inputs[index++]);
+            string i = inputs[index++].Trim().ToUpperInvariant();
+            // Check for hex input
+            if (i.StartsWith("0X"))
+            {
+                // Trim "0x" from beginning of number
+                i = i.Substring(2);
+                return uint.Parse(i, System.Globalization.NumberStyles.AllowHexSpecifier,System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+                return XmlConvert.ToUInt32(i);
+
         }
 
         protected internal override void Serialize(uint value, List<string> results)
