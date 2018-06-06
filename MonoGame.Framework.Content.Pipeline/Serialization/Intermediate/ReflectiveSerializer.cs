@@ -23,11 +23,6 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             public ContentTypeSerializer Serializer;
             public Action<object, object> Setter;
             public Func<object, object> Getter;
-
-            public override string ToString()
-            {
-                return Attribute.ToString();
-            }
         };
 
         private readonly List<ElementInfo> _elements = new List<ElementInfo>();
@@ -181,15 +176,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                         if (info.Attribute.Optional)
                             continue;
 
-
-                        // 
-                        //if (!info.Attribute.HasText && !info.Attribute.isAttribute)
-
                         // We failed to find a required element.
                         throw new InvalidContentException(string.Format("The Xml element `{0}` is required!", info.Attribute.ElementName));
                     }
                 }
-               
+
                 if (info.Attribute.SharedResource)
                 {
                     Action<object> fixup = (o) => info.Setter(result, o);
@@ -199,7 +190,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 {
                     var value = info.Getter(result);
                     input.ReadObject(info.Attribute, info.Serializer, value);
-                }                
+                }
                 else
                 {
                     var value = input.ReadObject<object>(info.Attribute, info.Serializer);
@@ -219,6 +210,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 return _baseSerializer.ObjectIsEmpty(value);
             if (_collectionHelper != null)
                 return _collectionHelper.ObjectIsEmpty(value);
+
             return false;
         }
 
