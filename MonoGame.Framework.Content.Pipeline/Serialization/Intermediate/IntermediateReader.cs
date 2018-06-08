@@ -17,7 +17,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
         private readonly Dictionary<string, List<Action<Type, string>>> _externalReferences;
 
+        private int _BookmarkLocationLine;
+        private int _BookmarkLocationPosition;
+        private int _PreviousDepth;
+
         public XmlReader Xml { get; private set; }
+
+        public bool IsBookmarked { get; private set; }
 
         public IntermediateSerializer Serializer { get; private set; }
 
@@ -28,13 +34,100 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             _filePath = filePath;
             _resourceFixups = new Dictionary<string, Action<object>>();
             _externalReferences = new Dictionary<string, List<Action<Type, string>>>();
+            _PreviousDepth = 0;
+            if (((IXmlLineInfo)Xml).HasLineInfo())
+            {
+                _BookmarkLocationLine = ((IXmlLineInfo)Xml).LineNumber;
+                _BookmarkLocationPosition = ((IXmlLineInfo)Xml).LinePosition;
+                _PreviousDepth = Xml.Depth;
+                SetBookmark();
+            }
+        }
+        /// <summary>
+        /// Save location and switch to alternate stream.
+        /// </summary>
+        /// <devdoc>
+        /// Revert if not found. Fail if not found again
+        /// </devdoc>
+        /// <returns>bool to indicate a successful bookmark</returns>
+        private bool SetBookmark()
+        {
+            // only works on text readers
+            if (!((IXmlLineInfo)Xml).HasLineInfo())
+                return false;
+            _PreviousDepth = Xml.Depth;
+            _BookmarkLocationLine = ((IXmlLineInfo)Xml).LineNumber;
+            _BookmarkLocationPosition = ((IXmlLineInfo)Xml).LinePosition;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Restores Position to Last read location.
+        /// </summary>
+        private void ResetToBookmark()
+        {
+            Xml.Close();
+            Xml.Dispose();
+            Xml = XmlReader.Create(_filePath);
+
+            while (((IXmlLineInfo)Xml).LineNumber != _BookmarkLocationLine &&
+                      ((IXmlLineInfo)Xml).LinePosition != _BookmarkLocationPosition)
+                Xml.Read();
+        }
+        private void ResetToPosition(int Line, int Position)
+        {
+            Xml.Close();
+            Xml.Dispose();
+            Xml = XmlReader.Create(_filePath);
+
+            while (((IXmlLineInfo)Xml).LineNumber != Line &&
+                      ((IXmlLineInfo)Xml).LinePosition != Position)
+                Xml.Read();
         }
 
         public bool MoveToElement(string elementName)
         {
             var nodeType = Xml.MoveToContent();
-            return  nodeType == XmlNodeType.Element && 
-                    Xml.Name == elementName;
+
+            //Set bookmark if we have moved deeper. If bookmark fails return original check
+            if (Xml.Depth > _PreviousDepth)
+                if(!SetBookmark())
+                    return (nodeType == XmlNodeType.Element && Xml.Name == elementName);
+
+            //Save last position in case of failure
+            int ReadLocationLine = ((IXmlLineInfo)Xml).LineNumber;
+            int ReadLocationPosition = ((IXmlLineInfo)Xml).LinePosition;
+
+            if (nodeType == XmlNodeType.Element && Xml.Name == elementName)
+            {
+                //Set bookmark if we have moved up successfully.
+                if (Xml.Depth < _PreviousDepth)
+                    SetBookmark();
+                return true;
+            }
+
+            //check forward siblings
+            Xml.ReadToNextSibling(elementName);
+
+            if (Xml.NodeType == XmlNodeType.Element && Xml.Name == elementName)
+                return true;
+            // then next parent.
+            Xml.Read();
+            Xml.MoveToContent();
+            if (Xml.NodeType == XmlNodeType.Element && Xml.Name == elementName)
+                return true;
+
+            ResetToBookmark();
+            // Revert and check siblings again.
+            Xml.ReadToNextSibling(elementName);
+
+            if (Xml.NodeType == XmlNodeType.Element && Xml.Name == elementName)
+                return true;
+
+            // Reset to saved and fail
+            ResetToPosition(ReadLocationLine, ReadLocationPosition);
+            return false;
         }
  
         public T ReadObject<T>(ContentSerializerAttribute format)
@@ -116,6 +209,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
 
             if (isEmpty)
                 Xml.Skip();
+
+            // Seemed to be getting hung up on extra witespace
+            Xml.MoveToContent();
 
             if (!isEmpty)
                 Xml.ReadEndElement();

@@ -102,7 +102,11 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 reader.ReadExternalReferences();
 
                 // Move past the closing XnaContent element.
-                input.ReadEndElement();
+                if (input.ReadState == ReadState.Interactive)
+                {
+                    input.MoveToContent();
+                    input.ReadEndElement();
+                }
             }
             catch (XmlException xmlException)
             {
