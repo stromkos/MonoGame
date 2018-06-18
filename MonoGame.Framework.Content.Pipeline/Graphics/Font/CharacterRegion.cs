@@ -2,17 +2,19 @@ using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 
+using Microsoft.Xna.Framework.Utilities;
+
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
 	// Describes a range of consecutive characters that should be included in the font.
 	[TypeConverter(typeof(CharacterRegionTypeConverter))]
 	public struct CharacterRegion
 	{
-	    public char Start;
-	    public char End;
+	    public CharEx Start;
+	    public CharEx End;
 
 		// Enumerates all characters within the region.        
-	    public IEnumerable<Char> Characters()
+	    public IEnumerable<CharEx> Characters()
 	    {
 	        for (var c = Start; c <= End; c++)
 	        {
@@ -21,7 +23,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 	    }
 
 	    // Constructor.
-        public CharacterRegion(char start, char end)
+        public CharacterRegion(CharEx start, CharEx end)
         {
             if (start > end)
                 throw new ArgumentException();

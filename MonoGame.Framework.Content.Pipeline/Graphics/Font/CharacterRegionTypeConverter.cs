@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -29,21 +30,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			//  0x20-0x7F
 
 			var splitStr = source.Split('-');
-			var split = new char[splitStr.Length];
-			for (int i = 0; i < splitStr.Length; i++)
-			{
-				split[i] = ConvertCharacter(splitStr[i]);
-			}
+			
 
-			switch (split.Length)
+			switch (splitStr.Length)
 			{
 				case 1:
 				// Only a single character (eg. "a").
-				return new CharacterRegion(split[0], split[0]);
+				return new CharacterRegion(new CharEx(splitStr[0]), new CharEx(splitStr[0]));
 
 				case 2:
 				// Range of characters (eg. "a-z").
-				return new CharacterRegion(split[0], split[1]);
+				return new CharacterRegion(new CharEx(splitStr[0]), new CharEx(splitStr[1]));
 
 				default:
 				throw new ArgumentException();
@@ -51,17 +48,17 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
 
 
-		static char ConvertCharacter(string value)
+		static CharEx ConvertCharacter(string value)
 		{
-			if (value.Length == 1)
+			if (value.Length == 1 || (value.Length == 2 && Char.IsSurrogate(value[0])))
 			{
 				// Single character directly specifies a codepoint.
-				return value[0];
+				return new CharEx(value);
 			}
 			else
 			{
 				// Otherwise it must be an integer (eg. "32" or "0x20").
-				return (char)(int)intConverter.ConvertFromInvariantString(value);
+				return new CharEx((int)intConverter.ConvertFromInvariantString(value));
 			}
 		}
 

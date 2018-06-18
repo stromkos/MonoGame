@@ -450,7 +450,7 @@ namespace Microsoft.Xna.Framework.Content
 			}
 
             var stream = OpenStream(assetName);
-            using (var xnbReader = new BinaryReader(stream))
+            using (var xnbReader = new BinaryReader(stream,System.Text.UTF32Encoding.Unicode))
             {
                 using (var reader = GetContentReaderFromXnb(assetName, stream, xnbReader, null))
                 {

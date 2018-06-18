@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler;
 using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Utilities;
 using NUnit.Framework;
 #if XNA
 using System.Reflection;
@@ -456,7 +457,7 @@ namespace MonoGame.Tests.ContentPipeline
                 expectedCharacters.Add(HttpUtility.HtmlDecode("&#916;")[0]);
                 expectedCharacters.Add(HttpUtility.HtmlDecode("&#176;")[0]);
 
-                var characters = new List<char>(fontDesc.Characters);
+                var characters = new List<CharEx>(fontDesc.Characters);
                 foreach (var c in expectedCharacters)
                 {
                     Assert.Contains(c, characters);

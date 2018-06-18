@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpFont;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 					var glyphList = new List<Glyph>();
 					// Rasterize each character in turn.
-					foreach (char character in characters)
+					foreach (CharEx character in characters)
 					{
 						var glyph = ImportGlyph(character, face);
 						glyphList.Add(glyph);
@@ -87,7 +88,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
 
 		// Rasterizes a single character glyph.
-		private Glyph ImportGlyph(char character, Face face)
+		private Glyph ImportGlyph(CharEx character, Face face)
 		{
 			uint glyphIndex = face.GetCharIndex(character);
 			face.LoadGlyph(glyphIndex, LoadFlags.Default, LoadTarget.Normal);

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 		private Color transparentPixel = Color.Magenta;
 
 		[DefaultValue(' ')]
-		public virtual char FirstCharacter { get; set; }
+		public virtual CharEx FirstCharacter { get; set; }
 
 		[DefaultValue (true)]
 		public virtual bool PremultiplyAlpha { get; set; }
@@ -29,9 +30,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 		    PremultiplyAlpha = true;
 		}
 
-		protected virtual char GetCharacterForIndex (int index)
+		protected virtual CharEx GetCharacterForIndex (int index)
 		{
-			return (char)(((int)FirstCharacter) + index);
+			return new CharEx(FirstCharacter + index);
 		}
 
         private List<Glyph> ExtractGlyphs(PixelBitmapContent<Color> bitmap)

@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
+using System.Linq;
+
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Graphics 
 {
@@ -24,7 +27,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
         private readonly Glyph[] _glyphs;
         private readonly CharacterRegion[] _regions;
-        private char? _defaultCharacter;
+        private CharEx? _defaultCharacter;
         private int _defaultGlyphIndex = -1;
 		
 		private readonly Texture2D _texture;
@@ -34,38 +37,53 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// </summary>
 		public Glyph[] Glyphs { get { return _glyphs; } }
 
-		class CharComparer: IEqualityComparer<char>
+		class CharComparer: IEqualityComparer<Char>
 		{
-			public bool Equals(char x, char y)
+			public bool Equals(Char x, Char y)
 			{
 				return x == y;
 			}
 
-			public int GetHashCode(char b)
+			public int GetHashCode(Char b)
 			{
-				return (b);
+				return (b.GetHashCode());
 			}
 
 			static public readonly CharComparer Default = new CharComparer();
 		}
+        class CharExComparer : IEqualityComparer<CharEx>
+        {
+            public bool Equals(CharEx x, CharEx y)
+            {
+                return x == y;
+            }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SpriteFont" /> class.
-		/// </summary>
-		/// <param name="texture">The font texture.</param>
-		/// <param name="glyphBounds">The rectangles in the font texture containing letters.</param>
-		/// <param name="cropping">The cropping rectangles, which are applied to the corresponding glyphBounds to calculate the bounds of the actual character.</param>
-		/// <param name="characters">The characters.</param>
-		/// <param name="lineSpacing">The line spacing (the distance from baseline to baseline) of the font.</param>
-		/// <param name="spacing">The spacing (tracking) between characters in the font.</param>
-		/// <param name="kerning">The letters kernings(X - left side bearing, Y - width and Z - right side bearing).</param>
-		/// <param name="defaultCharacter">The character that will be substituted when a given character is not included in the font.</param>
-		public SpriteFont (
-			Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<char> characters,
-			int lineSpacing, float spacing, List<Vector3> kerning, char? defaultCharacter)
+            public int GetHashCode(CharEx b)
+            {
+                return (b.GetHashCode());
+            }
+
+            static public readonly CharExComparer Default = new CharExComparer();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpriteFont" /> class.
+        /// </summary>
+        /// <param name="texture">The font texture.</param>
+        /// <param name="glyphBounds">The rectangles in the font texture containing letters.</param>
+        /// <param name="cropping">The cropping rectangles, which are applied to the corresponding glyphBounds to calculate the bounds of the actual character.</param>
+        /// <param name="characters">The characters.</param>
+        /// <param name="lineSpacing">The line spacing (the distance from baseline to baseline) of the font.</param>
+        /// <param name="spacing">The spacing (tracking) between characters in the font.</param>
+        /// <param name="kerning">The letters kernings(X - left side bearing, Y - width and Z - right side bearing).</param>
+        /// <param name="defaultCharacter">The character that will be substituted when a given character is not included in the font.</param>
+        public SpriteFont (
+			Texture2D texture, List<Rectangle> glyphBounds, List<Rectangle> cropping, List<CharEx> characters,
+			int lineSpacing, float spacing, List<Vector3> kerning, CharEx? defaultCharacter)
 		{
-			Characters = new ReadOnlyCollection<char>(characters.ToArray());
-			_texture = texture;
+			Characters = new ReadOnlyCollection<CharEx>(characters.ToArray());
+            CharactersUTF16 = new ReadOnlyCollection<char>(characters.Where(a => a.isUTF16()).Select(a => (char)a).ToArray());
+            _texture = texture;
 			LineSpacing = lineSpacing;
 			Spacing = spacing;
 
@@ -122,24 +140,42 @@ namespace Microsoft.Xna.Framework.Graphics
         /// </summary>
         /// <returns>A new Dictionary containing all of the glyphs inthis SpriteFont</returns>
         /// <remarks>Can be used to calculate character bounds when implementing custom SpriteFont rendering.</remarks>
-        public Dictionary<char, Glyph> GetGlyphs()
+        public Dictionary<CharEx, Glyph> GetGlyphs()
         {
-            var glyphsDictionary = new Dictionary<char, Glyph>(_glyphs.Length, CharComparer.Default);
+            var glyphsDictionary = new Dictionary<CharEx, Glyph>(_glyphs.Length, CharExComparer.Default);
             foreach(var glyph in _glyphs)
                 glyphsDictionary.Add(glyph.Character, glyph);
             return glyphsDictionary;
         }
+        /// <summary>
+        /// Returns a copy of the dictionary containing the glyphs in this SpriteFont.
+        /// </summary>
+        /// <returns>A new Dictionary containing all of the glyphs inthis SpriteFont</returns>
+        /// <remarks>Can be used to calculate character bounds when implementing custom SpriteFont rendering.</remarks>
+        public Dictionary<Char, Glyph> GetGlyphsUTF16()
+        {
+            var glyphsDictionary = new Dictionary<Char, Glyph>(_glyphs.Length, CharComparer.Default);
+            foreach (var glyph in _glyphs)
+                if(glyph.Character.isUTF16())
+                    glyphsDictionary.Add((char)glyph.Character, glyph);
+            return glyphsDictionary;
+        }
 
-		/// <summary>
-		/// Gets a collection of the characters in the font.
-		/// </summary>
-		public ReadOnlyCollection<char> Characters { get; private set; }
+        /// <summary>
+        /// Gets a collection of the characters in the font.
+        /// </summary>
+        public ReadOnlyCollection<CharEx> Characters { get; private set; }
 
-		/// <summary>
-		/// Gets or sets the character that will be substituted when a
-		/// given character is not included in the font.
-		/// </summary>
-		public char? DefaultCharacter
+        /// <summary>
+        /// Gets a collection of the characters in the font.
+        /// </summary>
+        public ReadOnlyCollection<Char> CharactersUTF16 { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the character that will be substituted when a
+        /// given character is not included in the font.
+        /// </summary>
+        public CharEx? DefaultCharacter
         {
             get { return _defaultCharacter; }
             set
@@ -260,7 +296,7 @@ namespace Microsoft.Xna.Framework.Graphics
             size.Y = offset.Y + finalLineHeight;
 		}
         
-        internal unsafe bool TryGetGlyphIndex(char c, out int index)
+        internal unsafe bool TryGetGlyphIndex(CharEx c, out int index)
         {
             fixed (CharacterRegion* pRegions = _regions)
             {
@@ -299,7 +335,7 @@ namespace Microsoft.Xna.Framework.Graphics
             return true;
         }
 
-        internal int GetGlyphIndexOrDefault(char c)
+        internal int GetGlyphIndexOrDefault(CharEx c)
         {
             int glyphIdx;
             if (!TryGetGlyphIndex(c, out glyphIdx))
@@ -315,31 +351,32 @@ namespace Microsoft.Xna.Framework.Graphics
         
         internal struct CharacterSource 
         {
-			private readonly string _string;
-			private readonly StringBuilder _builder;
+            //private readonly string _string;
+            //private readonly StringBuilder _builder;
+            CharEx[] chars;
 
+            /// <summary>
+            /// Count of the actual Characters. The actual string length may difer.
+            /// </summary>
+            public readonly int Length;
 			public CharacterSource(string s)
 			{
-				_string = s;
-				_builder = null;
-				Length = s.Length;
+                chars = CharEx.ToArray(s);
+				Length = chars.Length;
 			}
 
 			public CharacterSource(StringBuilder builder)
 			{
-				_builder = builder;
-				_string = null;
-				Length = _builder.Length;
-			}
+                chars = CharEx.ToArray(builder.ToString());
+                Length = chars.Length;
+            }
 
-			public readonly int Length;
-			public char this [int index] 
+			
+			public CharEx this [int index]
             {
-				get 
+				get
                 {
-					if (_string != null)
-						return _string[index];
-					return _builder[index];
+					return chars[index];
 				}
 			}
 		}
@@ -353,7 +390,7 @@ namespace Microsoft.Xna.Framework.Graphics
             /// <summary>
             /// The char associated with this glyph.
             /// </summary>
-			public char Character;
+			public CharEx Character;
             /// <summary>
             /// Rectangle in the font texture where this letter exists.
             /// </summary>
@@ -383,17 +420,17 @@ namespace Microsoft.Xna.Framework.Graphics
 
 			public override string ToString ()
 			{
-                return "CharacterIndex=" + Character + ", Glyph=" + BoundsInTexture + ", Cropping=" + Cropping + ", Kerning=" + LeftSideBearing + "," + Width + "," + RightSideBearing;
+                return "CharacterIndex=" + Character.ToString() + ", Glyph=" + BoundsInTexture + ", Cropping=" + Cropping + ", Kerning=" + LeftSideBearing + "," + Width + "," + RightSideBearing;
 			}
 		}
 
         private struct CharacterRegion
         {
-            public char Start;
-            public char End;
+            public CharEx Start;
+            public CharEx End;
             public int StartIndex;
 
-            public CharacterRegion(char start, int startIndex)
+            public CharacterRegion(CharEx start, int startIndex)
             {
                 this.Start = start;                
                 this.End = start;

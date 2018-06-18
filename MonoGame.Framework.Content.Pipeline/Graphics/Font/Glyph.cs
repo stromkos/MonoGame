@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 {
@@ -20,7 +20,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 	internal class Glyph
 	{
 		// Constructor.
-        public Glyph(char character, BitmapContent bitmap, Rectangle? subrect = null)
+        public Glyph(CharEx character, BitmapContent bitmap, Rectangle? subrect = null)
 		{
 			this.Character = character;
 			this.Bitmap = bitmap;
@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		}
             
 		// Unicode codepoint.
-		public char Character;
+		public CharEx Character;
 
 		// Glyph image data (may only use a portion of a larger bitmap).
         public BitmapContent Bitmap;

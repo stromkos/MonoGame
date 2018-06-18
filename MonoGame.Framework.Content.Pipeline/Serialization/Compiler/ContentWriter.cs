@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Utilities.LZ4;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Builder;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
 {
@@ -446,7 +447,10 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             Write(value.M43);
             Write(value.M44);
         }
-
+        public void Write(CharEx value)
+        {
+            Write(value.ToString().ToCharArray(),0, value.ToString().Length);
+        }
         /// <summary>
         /// Writes a Matrix value.
         /// </summary>
