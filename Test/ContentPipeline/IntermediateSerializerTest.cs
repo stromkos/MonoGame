@@ -410,14 +410,14 @@ namespace MonoGame.Tests.ContentPipeline
                 Spacing = 0.75f,
                 UseKerning = true,
                 Style = FontDescriptionStyle.Bold,
-                DefaultCharacter = '*',
+                DefaultCharacter = (Microsoft.Xna.Framework.Utilities.CharEx)'*',
                 ExtendedListProperty = { "item0", "item1", "item2" }
             };
 
             for (var i = 32; i <= 126; i++)
-                fontDescription.Characters.Add((char) i);
-            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#916;")[0]);
-            fontDescription.Characters.Add(HttpUtility.HtmlDecode("&#176;")[0]);
+                fontDescription.Characters.Add(new Microsoft.Xna.Framework.Utilities.CharEx(i));
+            fontDescription.Characters.Add((Microsoft.Xna.Framework.Utilities.CharEx)HttpUtility.HtmlDecode("&#916;")[0]);
+            fontDescription.Characters.Add((Microsoft.Xna.Framework.Utilities.CharEx)HttpUtility.HtmlDecode("&#176;")[0]);
 
             SerializeAndAssert("19_FontDescription.xml", fontDescription);
         }

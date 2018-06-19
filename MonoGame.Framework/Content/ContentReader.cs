@@ -255,73 +255,23 @@ namespace Microsoft.Xna.Framework.Content
                     }));
             }
         }
-        //public override char ReadChar()
-        //{
-
-        //    // BinaryReader's ReadChar throws error on UTF16 encoded chars
-        //    // to ensure compatability (without having to analyze encoding from byte stream) try the default read first.
-        //    try
-        //    {
-        //        // error on Peek so the position does not change
-        //        base.PeekChar();
-
-        //        // no error return original
-        //        return base.ReadChar();
-        //    }
-        //    catch(ArgumentException)
-        //    {
-        //        //throw new Exception("FixME");
-        //        // found a surragate
-        //        // Read the current 2-bytes, will leave the position mid char and throw exception for second char as well
-        //        var b = base.ReadBytes(2);
-        //        return BitConverter.ToChar(b, 0);
-        //    }
-        //    //
-
-            
-        //}
-        //public CharEx? ReadCharExNullable()
-        //{
-        //    CharEx? retVal = null;
-        //    char? first = ReadChar();
-        //    if (first != null)
-        //    {
-        //        if (Char.IsHighSurrogate((char)first))
-        //        {
-        //            char? second = ReadChar();
-        //            if (second == null || !Char.IsLowSurrogate((char)first))
-        //                throw new InvalidCastException("Expected UTF-32 Pair for Char");
-        //            retVal = new CharEx((char)first, (char)second);
-        //        }
-        //        else
-        //            retVal = new CharEx((char)first);
-        //    }
-
-        //    return retVal;
-        //}
+       
         public CharEx ReadCharEx()
         {
-            //CharEx retVal = (CharEx)0;
-            CharEx retVal;
-            
-            char[] first = ReadChars(1);
-            System.Diagnostics.Debugger.Launch();
-            //if (Char.IsHighSurrogate(first))
-            //{
-            //    char second = ReadChar();
-            //    if (!Char.IsLowSurrogate((char)first))
-            //        throw new InvalidCastException("Expected UTF-32 Pair for Char");
-            //    retVal = new CharEx((char)first, (char)second);
-            //}
-            //else
-            //    retVal = new CharEx((char)first);
-            //retVal = new CharEx('Z');
-            if (first.Length ==1)
-                retVal = new CharEx(first[0]);
-            else
-                retVal = new CharEx(first[0],first[1]);
+            int len = 1;
+            byte first = base.ReadByte();
 
-            return retVal;
+            while (((first << (len)) & 0x80) != 0)
+                len++;
+
+            byte[] byt = new byte[len];
+            byt[0] = first;
+            for (int i = 1; i < len; i++)
+            {
+                byt[i] = base.ReadByte();
+            }
+            return new CharEx(System.Text.UnicodeEncoding.UTF8.GetString(byt));
+
         }
 
         public Vector2 ReadVector2()

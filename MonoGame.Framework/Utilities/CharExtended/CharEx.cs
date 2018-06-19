@@ -1,5 +1,7 @@
+using Microsoft.Xna.Framework.Content;
 using System;
 using System.Collections.Generic;
+
 
 
 namespace Microsoft.Xna.Framework.Utilities
@@ -9,23 +11,24 @@ namespace Microsoft.Xna.Framework.Utilities
     /// </summary>
     public struct CharEx:IConvertible,IComparable<CharEx>,IComparable<Char>, IEquatable<CharEx>, IEquatable<Char>
     {
-        internal int _value;
+        [ContentSerializerAttribute]
+        public int Value;
 
 
         #region Constructors
         public CharEx(int UTF32)
         {
-            _value = UTF32;
+            Value = UTF32;
         }
         public CharEx(char High,char Low)
         {
-            _value = char.ConvertToUtf32(High, Low);
+            Value = char.ConvertToUtf32(High, Low);
         }
         public CharEx(char UTF16)
         {
             if (char.IsSurrogate(UTF16))
                 throw new ArgumentOutOfRangeException();
-            _value = (int)UTF16;
+            Value = (int)UTF16;
         }
         
         public CharEx(string UTF32)
@@ -37,35 +40,35 @@ namespace Microsoft.Xna.Framework.Utilities
                 // use signed 64bit values to handle overflow cases and signed values
                 if (UTF32.StartsWith("&#x"))
                 {
-                    _value = (int)long.Parse(UTF32.Substring(3), System.Globalization.NumberStyles.AllowHexSpecifier, System.Globalization.CultureInfo.InvariantCulture);
+                    Value = (int)long.Parse(UTF32.Substring(3), System.Globalization.NumberStyles.AllowHexSpecifier, System.Globalization.CultureInfo.InvariantCulture);
                 }
                 else
                     if (UTF32.StartsWith("&#"))
                 {
-                    _value = (int)long.Parse(UTF32.Substring(2),System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
+                    Value = (int)long.Parse(UTF32.Substring(2),System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
                 }
                 throw new ArgumentOutOfRangeException();
             }
-            _value = char.ConvertToUtf32(UTF32,0);
+            Value = char.ConvertToUtf32(UTF32,0);
         }
         #endregion
 
         #region Instance Methods
         public bool isASCII()
         {
-            return _value <= 0x7F;
+            return Value <= 0x7F;
         }
         public bool isExtendedASCII()
         {
-            return _value <= 0xFF;
+            return Value <= 0xFF;
         }
         public bool isUTF16()
         {
-            return _value <= 0xFFFF;
+            return Value <= 0xFFFF;
         }
         public bool isUTF32()
         {
-            return _value > 0xFFFF;
+            return Value > 0xFFFF;
         }
         #endregion
 
@@ -98,43 +101,43 @@ namespace Microsoft.Xna.Framework.Utilities
         {
             if (c.isUTF32())
                 throw new InvalidCastException();
-            return (char)c._value;
+            return (char)c.Value;
         }
-        public static implicit operator CharEx(char c)
+        public static explicit operator CharEx(char c)
         {
             return new CharEx(c);
         }
         public static implicit operator int(CharEx c)
         {
-            return c._value;
+            return c.Value;
         }
         public static implicit operator uint(CharEx c)
         {
-            return (uint)c._value;
+            return (uint)c.Value;
         }
         public static bool operator >(CharEx a, CharEx b)
         {
-            return a._value > b._value;
+            return a.Value > b.Value;
         }
         public static bool operator <(CharEx a, CharEx b)
         {
-            return a._value < b._value;
+            return a.Value < b.Value;
         }
         public static CharEx operator +(CharEx a,int i)
         {
-            return new CharEx(a._value + i);
+            return new CharEx(a.Value + i);
         }
         public static CharEx operator ++(CharEx a)
         {
-            return new CharEx(a._value + 1);
+            return new CharEx(a.Value + 1);
         }
         public static CharEx operator -(CharEx a, int i)
         {
-            return new CharEx(a._value - i);
+            return new CharEx(a.Value - i);
         }
         public static CharEx operator --(CharEx a)
         {
-            return new CharEx(a._value - 1);
+            return new CharEx(a.Value - 1);
         }
         public static bool operator ==(CharEx a, CharEx b)
         {
@@ -166,113 +169,121 @@ namespace Microsoft.Xna.Framework.Utilities
         #region Conversion Types
         public TypeCode GetTypeCode()
         {
-            return _value.GetTypeCode();
+            return Value.GetTypeCode();
         }
 
         public bool ToBoolean(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToBoolean(provider);
+            return ((IConvertible)Value).ToBoolean(provider);
         }
 
         public byte ToByte(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToByte(provider);
+            return ((IConvertible)Value).ToByte(provider);
         }
 
         public char ToChar(IFormatProvider provider)
         {
             if (isUTF32())
                 throw new ArgumentOutOfRangeException();
-            return ((IConvertible)_value).ToChar(provider);
+            return ((IConvertible)Value).ToChar(provider);
         }
 
         public DateTime ToDateTime(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToDateTime(provider);
+            return ((IConvertible)Value).ToDateTime(provider);
         }
 
         public decimal ToDecimal(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToDecimal(provider);
+            return ((IConvertible)Value).ToDecimal(provider);
         }
 
         public double ToDouble(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToDouble(provider);
+            return ((IConvertible)Value).ToDouble(provider);
         }
 
         public short ToInt16(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToInt16(provider);
+            return ((IConvertible)Value).ToInt16(provider);
         }
 
         public int ToInt32(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToInt32(provider);
+            return ((IConvertible)Value).ToInt32(provider);
         }
 
         public long ToInt64(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToInt64(provider);
+            return ((IConvertible)Value).ToInt64(provider);
         }
 
         public sbyte ToSByte(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToSByte(provider);
+            return ((IConvertible)Value).ToSByte(provider);
         }
 
         public float ToSingle(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToSingle(provider);
+            return ((IConvertible)Value).ToSingle(provider);
         }
 
         public override string ToString()
         {   
-            return Char.ConvertFromUtf32(_value);
+            return Char.ConvertFromUtf32(Value);
         }
 
         public string ToString(IFormatProvider provider)
         {
-            return _value.ToString(provider);
+            return Value.ToString(provider);
         }
 
         public object ToType(Type conversionType, IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToType(conversionType, provider);
+            return ((IConvertible)Value).ToType(conversionType, provider);
         }
 
         public ushort ToUInt16(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToUInt16(provider);
+            return ((IConvertible)Value).ToUInt16(provider);
         }
 
         public uint ToUInt32(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToUInt32(provider);
+            return ((IConvertible)Value).ToUInt32(provider);
         }
 
         public ulong ToUInt64(IFormatProvider provider)
         {
-            return ((IConvertible)_value).ToUInt64(provider);
+            return ((IConvertible)Value).ToUInt64(provider);
         }
         #endregion
         public int CompareTo(CharEx obj)
         {
-            return _value.CompareTo(obj._value);
+            return Value.CompareTo(obj.Value);
         }
         public int CompareTo(Char obj)
         {
-            return _value.CompareTo((int)obj);
+            return Value.CompareTo((int)obj);
         }
 
         public bool Equals(CharEx other)
         {
-           return this._value == other._value;
+           return this.Value == other.Value;
         }
 
         public bool Equals(char other)
         {
-            return this._value == (int)other;
+            return this.Value == (int)other;
+        }
+        public override bool Equals(Object other)
+        {
+            return this == (CharEx)other;
+        }
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
         }
     }
     

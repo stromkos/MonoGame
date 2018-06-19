@@ -32,7 +32,7 @@ namespace MonoGame.Tests.ContentPipeline
 
             var processor = new FontTextureProcessor
             {
-                FirstCharacter = '0',
+                FirstCharacter = (Microsoft.Xna.Framework.Utilities.CharEx)'0',
                 PremultiplyAlpha = false
             };
 

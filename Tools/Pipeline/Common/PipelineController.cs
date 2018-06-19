@@ -1083,11 +1083,18 @@ namespace MonoGame.Tools.Pipeline
         {
             if (!ProjectOpen)
                 return path;
+            Uri relativeUri = null;
+            try
+            {
+                var dirUri = new Uri(ProjectLocation, UriKind.Absolute);
+                var fileUri = new Uri(path, UriKind.Relative);
+                relativeUri = dirUri.MakeRelativeUri(fileUri);
 
-            var dirUri = new Uri(ProjectLocation);
-            var fileUri = new Uri(path);
-            var relativeUri = dirUri.MakeRelativeUri(fileUri);
+            }
+            catch(Exception)
+            {
 
+            }
             if (relativeUri == null)
                 return path;
 

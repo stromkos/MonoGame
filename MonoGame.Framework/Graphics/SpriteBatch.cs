@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using Microsoft.Xna.Framework.Utilities;
 
 namespace Microsoft.Xna.Framework.Graphics
 {
@@ -653,11 +654,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-
+            var ca = CharEx.ToArray(text);
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
-            for (var i = 0; i < text.Length; ++i)
+            for (var i = 0; i < ca.Length; ++i)
             {
-                var c = text[i];
+                var c = ca[i];
 
                 if (c == '\r')
                     continue;
@@ -820,11 +821,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-
+            var ca = CharEx.ToArray(text);
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             for (var i = 0; i < text.Length; ++i)
             {
-                var c = text[i];
+                var c = ca[i];
 
                 if (c == '\r')
                     continue;
@@ -936,11 +937,11 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-
+            var ca = CharEx.ToArray(text.ToString());
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             for (var i = 0; i < text.Length; ++i)
             {
-                var c = text[i];
+                var c = ca[i];
 
                 if (c == '\r')
                     continue;
@@ -1102,11 +1103,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-
+            var ca = CharEx.ToArray(text.ToString());
             fixed (SpriteFont.Glyph* pGlyphs = spriteFont.Glyphs)
             for (var i = 0; i < text.Length; ++i)
             {
-                var c = text[i];
+
+                var c = ca[i];
 
                 if (c == '\r')
                     continue;

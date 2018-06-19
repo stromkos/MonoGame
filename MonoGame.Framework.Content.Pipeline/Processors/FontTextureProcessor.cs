@@ -26,7 +26,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
 		public FontTextureProcessor ()
 		{
-		    FirstCharacter = ' ';
+		    FirstCharacter = (CharEx)' ';
 		    PremultiplyAlpha = true;
 		}
 

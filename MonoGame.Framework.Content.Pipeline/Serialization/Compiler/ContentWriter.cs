@@ -449,7 +449,13 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
         }
         public void Write(CharEx value)
         {
+            //if(value.ToString().Length > 1)
+            throw new Exception("CharEx" + value.ToString());
             Write(value.ToString().ToCharArray(),0, value.ToString().Length);
+        }
+        public override void Write(Char value)
+        {
+            base.Write(value);
         }
         /// <summary>
         /// Writes a Matrix value.

@@ -581,12 +581,12 @@ But the answer was still '42'.
 		}
 
         [TestCase('ñ')]
-        [TestCase((char)127)]
-        [TestCase((char)31)]
+        [TestCase(127)]
+        [TestCase(31)]
         public void Throws_when_setting_unavailable_DefaultCharacter(char character)
 		{
             Assert.Throws<ArgumentException> (() =>
-                _defaultFont.DefaultCharacter = character);
+                _defaultFont.DefaultCharacter = (Microsoft.Xna.Framework.Utilities.CharEx)character);
 		}
 
         [TestCase((char)32)]
@@ -594,7 +594,7 @@ But the answer was still '42'.
         [TestCase((char)126)]
         public void Does_not_throw_when_setting_available_DefaultCharacter(char character)
         {
-            Assert.DoesNotThrow(() => _defaultFont.DefaultCharacter = character);
+            Assert.DoesNotThrow(() => _defaultFont.DefaultCharacter = (Microsoft.Xna.Framework.Utilities.CharEx)character);
         }
 	}
 }

@@ -33,7 +33,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
         }
 		
 		// Default to just the base ASCII character set.
-		public static CharacterRegion Default = new CharacterRegion(' ', '~');
+		public static CharacterRegion Default = new CharacterRegion((CharEx)' ', (CharEx)'~');
 
 
 		/// <summary>

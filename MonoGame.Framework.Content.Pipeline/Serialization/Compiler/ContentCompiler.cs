@@ -37,6 +37,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
                 try
                 {
                     exportedTypes = assembly.GetTypes();
+
                 }
                 catch (Exception)
                 {
@@ -52,10 +53,16 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
                     {
                         // Find the content type this writer implements
                         Type baseType = type.BaseType;
+
+                        // Prevent value types from adding System.ValueType
                         while ((baseType != null) && (baseType.GetGenericTypeDefinition() != contentTypeWriterType))
-                            baseType = baseType.BaseType;
+                            if (baseType.BaseType != null && baseType.BaseType == typeof(System.ValueType))
+                                break;
+                            else
+                                baseType = baseType.BaseType;
                         if (baseType != null)
                             typeWriterMap.Add(baseType, type);
+
                     }
                 }
             }
@@ -72,6 +79,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Compiler
             ContentTypeWriter result = null;
             var contentTypeWriterType = typeof(ContentTypeWriter<>).MakeGenericType(type);
             Type typeWriterType;
+
+            // debug here
+            //System.Diagnostics.Debugger.Launch();
 
             if (type == typeof(Array))
                 result = new ArrayWriter<Array>();
