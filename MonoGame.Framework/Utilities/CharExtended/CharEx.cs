@@ -1,3 +1,8 @@
+// Copyright 2018 S. Marc Stromko  All Rights Reserved.  
+// Permission is granted to use this file within the Monogame Framework for testing purposes only. Any and all other use is expressly prohibited.
+// It is my intention to release this license to open source if and when it is accepted to Monogame.
+// Please not that this code was never intended to be included in, and as such, should be considered as distinct and seperate, from the Monogame project.
+// This license superceeds any implied or implicit license(s) except for those granted to github, as stated in the terms of service Sections D.4 — D.7.
 using Microsoft.Xna.Framework.Content;
 using System;
 using System.Collections.Generic;
