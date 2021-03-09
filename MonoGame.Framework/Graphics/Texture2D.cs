@@ -411,7 +411,8 @@ namespace Microsoft.Xna.Framework.Graphics
                 }
                 else
                 {
-                    dataByteSize = roundedWidth * roundedHeight * fSize / (blockWidth * blockHeight);
+                    // Reordered to prevent overflow
+                    dataByteSize = roundedWidth * (roundedHeight * fSize / (blockWidth * blockHeight));
                 }
             }
             else

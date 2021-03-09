@@ -154,6 +154,27 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
             if (_format == sourceFormat && (sourceRegion == new Rectangle(0, 0, Width, Height)) && sourceRegion == destinationRegion)
             {
+                // Large BitmapCheck
+                // This does not copy. It is only a pointer.
+                // Could be dangerous. However, if your texture 
+                // passes the following test, the code would have crashed on GetPixelData() anyway.
+                if ((((long)Width * Height * _format.GetSize())>>31) > 0)
+                {
+                    if (sourceBitmap is PixelBitmapContent<Vector4>)
+                    {
+                        var src1 = sourceBitmap as PixelBitmapContent<Vector4>;
+                        var dst1 = this as PixelBitmapContent<Vector4>;
+                        dst1._pixelData = src1._pixelData;
+                    }
+                    else
+                    if (sourceBitmap is PixelBitmapContent<Color>)
+                    {
+                        var src1 = sourceBitmap as PixelBitmapContent<Color>;
+                        var dst1 = this as PixelBitmapContent<Color>;
+                        dst1._pixelData = src1._pixelData;
+                    }
+                }
+                else
                 SetPixelData(sourceBitmap.GetPixelData());
                 return true;
             }
@@ -218,6 +239,24 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
             if (_format == destinationFormat && (sourceRegion == new Rectangle(0, 0, Width, Height)) && sourceRegion == destinationRegion)
             {
+                // Large BitmapCheck
+                if ((((long)Width * Height * _format.GetSize())>>31) > 0)
+                {
+                    if (destinationBitmap is PixelBitmapContent<Vector4>)
+                    {
+                        var src1 = this as PixelBitmapContent<Vector4>;
+                        var dst1 = destinationBitmap as PixelBitmapContent<Vector4>;
+                        dst1._pixelData = src1._pixelData;
+                    }
+                    else
+                    if (destinationBitmap is PixelBitmapContent<Color>)
+                    {
+                        var src1 = this as PixelBitmapContent<Color>;
+                        var dst1 = destinationBitmap as PixelBitmapContent<Color>;
+                        dst1._pixelData = src1._pixelData;
+                    }
+                }
+                else
                 destinationBitmap.SetPixelData(GetPixelData());
                 return true;
             }

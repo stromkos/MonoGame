@@ -37,7 +37,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             if (string.IsNullOrWhiteSpace(fontFile))
             {
                 var directories = new List<string> { Path.GetDirectoryName(input.Identity.SourceFilename) };
-                var extensions = new string[] { "", ".ttf", ".ttc", ".otf" };
+                var extensions = new string[] { ".ttf", ".ttc", ".otf", "" };
 
                 // Add special per platform directories
                 if (CurrentPlatform.OS == OS.Windows)
@@ -88,7 +88,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
                 bool requiresPot, requiresSquare;
                 texProfile.Requirements(context, TextureFormat, out requiresPot, out requiresSquare);
 
-                var face = GlyphPacker.ArrangeGlyphs(glyphs, requiresPot, requiresSquare);
+                var face = GlyphPacker.ArrangeGlyphs(glyphs, requiresPot, requiresSquare, context.Logger);
 
 				// Adjust line and character spacing.
 				lineSpacing += input.Spacing;
@@ -98,7 +98,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 				{
                     output.CharacterMap.Add(glyph.Character);
 
-					var texRect = new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, glyph.Subrect.Height);
+					var texRect = glyph.Subrect;
 					output.Glyphs.Add(texRect);
 
 					var cropping = new Rectangle(0, (int)(glyph.YOffset - yOffsetMin), (int)glyph.XAdvance, output.VerticalLineSpacing);
@@ -163,24 +163,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
 
 		private static Glyph[] ImportFont(FontDescription options, out float lineSpacing, out int yOffsetMin, ContentProcessorContext context, string fontName)
 		{
-			// Which importer knows how to read this source font?
-			IFontImporter importer;
-
-			var TrueTypeFileExtensions = new List<string> { ".ttf", ".ttc", ".otf" };
-			//var BitmapFileExtensions = new List<string> { ".bmp", ".png", ".gif" };
-
-			string fileExtension = Path.GetExtension(fontName).ToLowerInvariant();
-
-			//			if (BitmapFileExtensions.Contains(fileExtension))
-			//			{
-			//				importer = new BitmapImporter();
-			//			}
-			//			else
-			//			{
-			if (!TrueTypeFileExtensions.Contains(fileExtension)) 
-                throw new PipelineException("Unknown file extension " + fileExtension);
-
-			importer = new SharpFontImporter();
+			IFontImporter importer = new SharpFontImporter();
 
 			// Import the source font data.
 			importer.Import(options, fontName);

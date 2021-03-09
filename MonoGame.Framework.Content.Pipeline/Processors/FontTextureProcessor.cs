@@ -118,7 +118,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Processors
             bool requiresPot, requiresSquare;
             texProfile.Requirements(context, TextureFormat, out requiresPot, out requiresSquare);
 
-            face = GlyphPacker.ArrangeGlyphs(glyphs.ToArray(), requiresPot, requiresSquare);
+            face = GlyphPacker.ArrangeGlyphs(glyphs.ToArray(), requiresPot, requiresSquare, context.Logger);
 			
 			foreach (var glyph in glyphs)
             {

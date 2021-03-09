@@ -19,15 +19,14 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 
 		public int YOffsetMin { get; private set; }
 
-		// Size of the temp surface used for GDI+ rasterization.
-		const int MaxGlyphSize = 1024;
-
 		Library lib = null;
+		Dictionary<uint,Glyph> duplicates;
 
 		public void Import(FontDescription options, string fontName)
 		{
 			lib = new Library();
-			// Create a bunch of GDI+ objects.
+			duplicates = new Dictionary<uint,Glyph>(options.Characters.Count);
+
 			var face = CreateFontFace(options, fontName);
 			try
             {
@@ -61,8 +60,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			}
 		}
 
-
-		// Attempts to instantiate the requested GDI+ font object.
+		// Creates the SharpFont face object.
 		private Face CreateFontFace(FontDescription options, string fontName)
 		{
 			try
@@ -90,6 +88,24 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 		private Glyph ImportGlyph(char character, Face face)
 		{
 			uint glyphIndex = face.GetCharIndex(character);
+			bool isNewDuplicate = false;
+
+			Glyph output;
+
+			if (duplicates.TryGetValue(glyphIndex, out output))
+			{
+				return new Glyph(character, output.Bitmap)
+				{
+					XOffset = output.XOffset,
+					XAdvance = output.XAdvance,
+					YOffset = output.YOffset,
+					CharacterWidths = output.CharacterWidths,
+					GlyphIndex = glyphIndex			
+				};
+			}
+			else
+				isNewDuplicate = true;
+
 			face.LoadGlyph(glyphIndex, LoadFlags.Default, LoadTarget.Normal);
 			face.Glyph.RenderGlyph(RenderMode.Normal);
 
@@ -130,30 +146,29 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
 			}
 
             if (glyphBitmap == null) 
-			{
-				var gHA = face.Glyph.Metrics.HorizontalAdvance >> 6;
-				var gVA = face.Size.Metrics.Height >> 6;
-
-				gHA = gHA > 0 ? gHA : gVA;
-				gVA = gVA > 0 ? gVA : gHA;
-
-                glyphBitmap = new PixelBitmapContent<byte>(gHA, gVA);
-			}
+				// this is stripped in glyph cropper so make it 1,1 instead of gHA, gVA
+                glyphBitmap = new PixelBitmapContent<byte>(1, 1);
 
 			// not sure about this at all
 			var abc = new ABCFloat ();
 			abc.A = face.Glyph.Metrics.HorizontalBearingX >> 6;
 			abc.B = face.Glyph.Metrics.Width >> 6;
 			abc.C = (face.Glyph.Metrics.HorizontalAdvance >> 6) - (abc.A + abc.B);
-
+			
 			// Construct the output Glyph object.
-			return new Glyph(character, glyphBitmap)
+			var newGlyph =  new Glyph(character, glyphBitmap)
 			{
 				XOffset = -(face.Glyph.Advance.X >> 6),
 				XAdvance = face.Glyph.Metrics.HorizontalAdvance >> 6,
 				YOffset = -(face.Glyph.Metrics.HorizontalBearingY >> 6),
-				CharacterWidths = abc
+				CharacterWidths = abc,
+				GlyphIndex = glyphIndex
 			};
+			
+			if (isNewDuplicate)
+				duplicates.Add(glyphIndex, newGlyph);
+			
+			return newGlyph;
 		}
 
 

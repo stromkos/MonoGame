@@ -265,10 +265,43 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
                 var dxt3Size = xBlocks * yBlocks * 16;
                 var buffer = new byte[dxt3Size];
 
-                var bytes = face.GetPixelData();
+                var bytes = new byte[1];
+                var bigColor = new Vector4[1,1];
+
+                bool tooBig = ((((long)face.Width * face.Height * 16)>>31) > 0);
+                if (tooBig)
+                {
+                    // this should have performance close to GetPixelData
+                    bigColor = new Vector4[face.Width, face.Height];
+                    var f = face as PixelBitmapContent<Vector4>;
+                    long count = 0;
+                    fixed (Vector4* big1 = bigColor)
+                    {
+                        Vector4* big = big1;
+                        for (int y = 0; y < f.Height; y++)
+                        {
+                            fixed (Vector4* tmp = f._pixelData[y])
+                            for (int x = 0; x < f.Width; x++)
+                            {
+                                big[x] = tmp[x];
+                            }
+                            big += face.Width;
+                        }
+                    }
+
+                }
+                else
+                    bytes = face.GetPixelData();
+                
+                // pin both
+                fixed (Vector4* big = bigColor)
                 fixed (byte* b = bytes)
                 {
-                    Vector4* colors = (Vector4*)b;
+                    Vector4* colors; 
+                    if(tooBig)
+                        colors = big;
+                    else
+                        colors = (Vector4*)b;
 
                     int w = 0;
                     int h = 0;
