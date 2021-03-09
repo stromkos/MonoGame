@@ -31,6 +31,7 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Graphics
             
 		// Unicode codepoint.
 		public char Character;
+		public uint GlyphIndex;
 
 		// Glyph image data (may only use a portion of a larger bitmap).
         public BitmapContent Bitmap;
