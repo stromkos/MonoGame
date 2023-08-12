@@ -64,7 +64,7 @@ private void ParseVersion()
 
         if (EnvironmentVariable("GITHUB_REPOSITORY") != "MonoGame/MonoGame")
             version += "-" + EnvironmentVariable("GITHUB_REPOSITORY_OWNER");
-        else if (EnvironmentVariable("GITHUB_REF") != "refs/heads/master")
+        else if (EnvironmentVariable("GITHUB_REF_TYPE") == "branch" && EnvironmentVariable("GITHUB_REF") != "refs/heads/master")
             version += "-develop";
 
         repositoryUrl = "https://github.com/" + EnvironmentVariable("GITHUB_REPOSITORY");
@@ -161,7 +161,7 @@ Task("TestDesktopGL")
     DotNetRun("../../../../Tests/MonoGame.Tests.DesktopGL.csproj", "", new DotNetRunSettings
     {
         WorkingDirectory = "Artifacts/Tests/DesktopGL/Debug",
-	    ArgumentCustomization = args => args.Append("--teamcity")
+        ArgumentCustomization = args => args.Append("--teamcity")
     });
 });
 
@@ -183,7 +183,7 @@ Task("TestWindowsDX")
     DotNetRun("../../../../Tests/MonoGame.Tests.WindowsDX.csproj", "", new DotNetRunSettings
     {
         WorkingDirectory = "Artifacts/Tests/WindowsDX/Debug",
-	    ArgumentCustomization = args => args.Append("--teamcity")
+        ArgumentCustomization = args => args.Append("--teamcity")
     });
 });
 
@@ -274,7 +274,7 @@ Task("TestTools")
     DotNetRun("../../../../Tools/MonoGame.Tools.Tests/MonoGame.Tools.Tests.csproj", "", new DotNetRunSettings
     {
         WorkingDirectory = "Artifacts/Tests/Tools/" + configuration,
-	    ArgumentCustomization = args => args.Append("--teamcity"),
+        ArgumentCustomization = args => args.Append("--teamcity"),
         Configuration = configuration
     });
 });
@@ -291,6 +291,17 @@ Task("PackVSTemplates")
     .WithCriteria(() => IsRunningOnWindows())
     .Does(() =>
 {
+    var shortVersion = version.Split('-')[0];
+
+    var versionReg = "<Identity Version=\"([^\"]*)\"";
+    var filePath = "Templates/MonoGame.Templates.VSExtension/source.extension.vsixmanifest";
+    var newVersion = "<Identity Version=\"" + shortVersion + "\"";
+    ReplaceRegexInFiles(filePath, versionReg, newVersion, System.Text.RegularExpressions.RegexOptions.Singleline);
+
+    versionReg = "[0-9](\\.[0-9])*";
+    filePath = "Templates/MonoGame.Templates.VSExtension/Templates.pkgdef";
+    ReplaceRegexInFiles(filePath, versionReg, shortVersion, System.Text.RegularExpressions.RegexOptions.Singleline);
+
     DotNetRestore("Templates/MonoGame.Templates.VSExtension/MonoGame.Templates.VSExtension.csproj");
     MSBuild("Templates/MonoGame.Templates.VSExtension/MonoGame.Templates.VSExtension.csproj", msBuildSettings);
 });
@@ -300,9 +311,8 @@ Task("PackVSMacTemplates")
     .WithCriteria(() => IsRunningOnMacOs())
     .Does(() =>
 {
-    // Uncomment this once VS for Mac 2022 goes stable :D
-    // DotNetRestore("Templates/MonoGame.Templates.VSMacExtension/MonoGame.Templates.VSMacExtension.csproj");
-    // DotNetBuild("Templates/MonoGame.Templates.VSMacExtension/MonoGame.Templates.VSMacExtension.csproj", dnBuildSettings);
+    DotNetRestore("Templates/MonoGame.Templates.VSMacExtension/MonoGame.Templates.VSMacExtension.csproj");
+    DotNetBuild("Templates/MonoGame.Templates.VSMacExtension/MonoGame.Templates.VSMacExtension.csproj", dnBuildSettings);
 });
 
 //////////////////////////////////////////////////////////////////////
